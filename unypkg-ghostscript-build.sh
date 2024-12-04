@@ -36,12 +36,12 @@ cd /uny/sources || exit
 
 pkgname="ghostscript"
 pkggit="https://git.ghostscript.com/ghostpdl.git refs/tags/*"
-gitdepth="--depth=1"
+gitdepth=""
 
 ### Get version info from git remote
 # shellcheck disable=SC2086
-latest_head="$(git ls-remote --refs --tags --sort="v:refname" $pkggit | grep -E "ghostscript-[0-9.]+$" | tail --lines=1)"
-latest_ver="$(echo "$latest_head" | grep -o "ghostscript-[0-9.].*" | sed "s|ghostscript-||")"
+latest_head="$(git ls-remote --refs --tags --sort="v:refname" $pkggit | grep -E "ghostpdl-[0-9.]+$" | tail --lines=1)"
+latest_ver="$(echo "$latest_head" | grep -o "ghostpdl-[0-9.].*" | sed "s|ghostpdl-||")"
 latest_commit_id="$(echo "$latest_head" | cut --fields=1)"
 
 version_details
