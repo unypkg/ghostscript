@@ -35,13 +35,13 @@ mkdir -pv /uny/sources
 cd /uny/sources || exit
 
 pkgname="ghostscript"
-pkggit="https://github.com/ghostscript/ghostscript.git refs/tags/*"
+pkggit="https://git.ghostscript.com/ghostpdl.git refs/tags/*"
 gitdepth="--depth=1"
 
 ### Get version info from git remote
 # shellcheck disable=SC2086
-latest_head="$(git ls-remote --refs --tags --sort="v:refname" $pkggit | grep -E "v[0-9.]+$" | tail --lines=1)"
-latest_ver="$(echo "$latest_head" | grep -o "v[0-9.].*" | sed "s|v||")"
+latest_head="$(git ls-remote --refs --tags --sort="v:refname" $pkggit | grep -E "ghostscript-[0-9.]+$" | tail --lines=1)"
+latest_ver="$(echo "$latest_head" | grep -o "ghostscript-[0-9.].*" | sed "s|ghostscript-||")"
 latest_commit_id="$(echo "$latest_head" | cut --fields=1)"
 
 version_details
@@ -51,9 +51,13 @@ echo "newer" >release-"$pkgname"
 
 git_clone_source_repo
 
-#cd "$pkg_git_repo_dir" || exit
-#./autogen.sh
-#cd /uny/sources || exit
+cd "$pkg_git_repo_dir" || exit
+rm -rf gpdl pcl
+rm -rf freetype jpeg libpng zlib
+git clone $gitdepth --recurse-submodules -j8 --single-branch -b \
+    "$(git ls-remote --refs --tags --sort="v:refname" https://github.com/DanBloomberg/leptonica.git refs/tags/* |
+        grep -E "/[0-9.]+$" | tail --lines=1 | sed "s|.*refs/[^/]*/||")" https://github.com/DanBloomberg/leptonica.git
+cd /uny/sources || exit
 
 archiving_source
 
@@ -62,7 +66,7 @@ archiving_source
 
 # unyc - run commands in uny's chroot environment
 # shellcheck disable=SC2154
-unyc <<"UNYEOF"
+unyc #<<"UNYEOF"
 set -vx
 source /uny/git/unypkg/fn
 
@@ -77,12 +81,18 @@ get_include_paths
 
 unset LD_RUN_PATH
 
-./configure \
-    --prefix=/uny/pkg/"$pkgname"/"$pkgver"
+./autogen.sh \
+    --prefix=/uny/pkg/"$pkgname"/"$pkgver" \
+    --disable-compile-inits \
+    --with-system-libtiff
 
 make -j"$(nproc)"
-make -j"$(nproc)" check 
+make -j"$(nproc)" so
+
 make -j"$(nproc)" install
+make -j"$(nproc)" soinstall &&
+    install -v -m644 base/*.h /uny/pkg/"$pkgname"/"$pkgver"/include/ghostscript &&
+    ln -sfvn ghostscript /uny/pkg/"$pkgname"/"$pkgver"/include/ps
 
 ####################################################
 ### End of individual build script
