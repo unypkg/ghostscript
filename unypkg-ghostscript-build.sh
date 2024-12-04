@@ -11,7 +11,7 @@ set -vx
 wget -qO- uny.nu/pkg | bash -s buildsys
 
 ### Installing build dependencies
-#unyp install python expat openssl
+unyp install fontconfig freetype libjpeg-turbo libpng libtiff libwebp
 
 #pip3_bin=(/uny/pkg/python/*/bin/pip3)
 #"${pip3_bin[0]}" install --upgrade pip
@@ -66,7 +66,7 @@ archiving_source
 
 # unyc - run commands in uny's chroot environment
 # shellcheck disable=SC2154
-unyc #<<"UNYEOF"
+unyc <<"UNYEOF"
 set -vx
 source /uny/git/unypkg/fn
 
