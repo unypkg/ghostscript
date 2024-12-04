@@ -40,7 +40,7 @@ gitdepth=""
 
 ### Get version info from git remote
 # shellcheck disable=SC2086
-latest_head="$(git ls-remote --refs --tags --sort="v:refname" $pkggit | grep -E "ghostpdl-[0-9.]+$" | tail --lines=1)"
+latest_head="$(git ls-remote --refs --tags --sort="v:refname" $pkggit | grep -E "ghostpdl-[0-9.]+$" | sort --version-sort --field-separator=- --key=2 | tail --lines=1)"
 latest_ver="$(echo "$latest_head" | grep -o "ghostpdl-[0-9.].*" | sed "s|ghostpdl-||")"
 latest_commit_id="$(echo "$latest_head" | cut --fields=1)"
 
